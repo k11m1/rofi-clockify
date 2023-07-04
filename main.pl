@@ -138,7 +138,7 @@ SQL
     my $insert_entry = $dbh->prepare($insert_entry_query);
 
     my $check_entry_query = <<SQL;
-SELECT COUNT(*) FROM projects WHERE id = ?;
+SELECT COUNT(*) FROM history WHERE id = ?;
 SQL
 
     my $sth_check_entry = $dbh->prepare($check_entry_query);
