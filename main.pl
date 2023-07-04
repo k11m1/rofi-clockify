@@ -110,7 +110,7 @@ SQL
         my $tasks = decode_json($out_tasks);
         foreach my $task (@$tasks) {
             # Check if project already exists
-            $sth_check_task->execute($id) or die "Error checking task existence: $DBI::errstr";
+            $sth_check_task->execute($task->{id}) or die "Error checking task existence: $DBI::errstr";
             my ($task_count) = $sth_check_task->fetchrow_array();
 
             if ($task_count == 0) {
