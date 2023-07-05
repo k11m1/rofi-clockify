@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use DBI;
 use JSON;
+use Getopt::Long;
 
 my $database = 'database.db';
 my $dbh = DBI->connect("dbi:SQLite:dbname=$database")
@@ -147,6 +148,7 @@ SQL
     foreach my $entry (@$history) {
         $sth_check_entry->execute($entry->{id}) or die "Error checking task existence: $DBI::errstr";
         my ($entry_count) = $sth_check_entry->fetchrow_array();
+        print "Entry count = $entry_count\n";
 
         if ($entry_count == 0) {
             # Execute the SQL statement to insert project data
@@ -298,9 +300,11 @@ sub select_entry {
 
     my $result = `clockify-cli start $project_id "$description" --task $task_id --json`;
 
-    print "$result\n";
 
-    my $entry = decode_json($result);
+    my $entry = decode_json($result)->[0];
+    if (!defined $entry) {
+        # TODO: error message
+    }
 
     my $insert_entry_query = <<SQL;
 INSERT INTO history (id, description, project_id, task_id, start) VALUES (?, ?, ?, ?, ?);
@@ -308,7 +312,11 @@ SQL
 
     my $insert_entry = $dbh->prepare($insert_entry_query);
 
-    $insert_entry->execute($entry->{id}, $entry->{description}, $entry->{project}->{id}, $entry->{task}->{id}, $entry->{timeInterval}->{start}) or die "Error inserting project data: $DBI::errstr";
+    $insert_entry->execute($entry->{id},
+                           $entry->{description},
+                           $entry->{project}->{id},
+                           $entry->{task}->{id},
+                           $entry->{timeInterval}->{start}) or die "Error inserting project data: $DBI::errstr";
 
 
 
@@ -317,12 +325,56 @@ SQL
 
 # init_database();
 # get_history();
-select_entry();
+# select_entry();
 
 
 
 
 
+# Define variables
+my $help;
+
+# Parse command-line options
+GetOptions(
+    'help' => \$help
+);
+
+# Handle the --help option
+if ($help) {
+    usage();
+    exit;
+}
+
+# Get the command argument
+my $command = shift @ARGV;
+
+# Handle the command and perform the corresponding actions
+if ($command) {
+    if ($command eq 'init') {
+        init_database();
+        exit;
+    }
+    elsif ($command eq 'start') {
+        select_entry();
+    }
+    else {
+        print "Unknown command: $command\n";
+        exit;
+    }
+}
+else {
+    print "Please provide a command.\n";
+    usage();
+    exit;
+}
+
+# Function to display usage information
+sub usage {
+    print "Usage: $0 [init|start]\n";
+    print "Commands:\n";
+    print "  init\t\tPerform database initialization\n";
+    print "  start\t\tSelect and start clockify entry\n";
+}
 
 
 
