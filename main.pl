@@ -5,6 +5,7 @@ use warnings;
 use DBI;
 use JSON;
 use Getopt::Long;
+use Desktop::Notify;
 
 my $cache_dir = $ENV{XDG_CACHE_HOME} || "/home/$ENV{USER}/.cache";
 my $database = "$cache_dir/klimify.db";
@@ -325,6 +326,8 @@ SQL
                            $entry->{task}->{id},
                            $entry->{timeInterval}->{start}) or die "Error inserting project data: $DBI::errstr";
 
+    notify_desktop("start $description", "$task_name\@$project_name");
+
 
 
 
@@ -383,6 +386,18 @@ sub usage {
     print "  start-dmenu\t\tSelect and start-dmenu clockify entry\n";
 }
 
+sub notify_desktop {
+    my $summary = shift @_;
+    my $text = shift @_;
+    
+    my $notify = Desktop::Notify->new();
+    my $notification = $notify->create(summary => "Klimify: $summary",
+                            body => "$text",
+                            timeout => 2000
+        );
+
+    $notification->show();
+}
 
 
 
