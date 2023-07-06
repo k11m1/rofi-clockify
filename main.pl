@@ -1,10 +1,13 @@
+#!/usr/bin/env perl
+
 use strict;
 use warnings;
 use DBI;
 use JSON;
 use Getopt::Long;
 
-my $database = 'database.db';
+my $cache_dir = $ENV{XDG_CACHE_HOME} || "/home/$ENV{USER}/.cache";
+my $database = "$cache_dir/klimify.db";
 my $dbh = DBI->connect("dbi:SQLite:dbname=$database")
     or die "Couldn't connect to database: $DBI::errstr";
 
