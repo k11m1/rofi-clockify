@@ -273,6 +273,10 @@ sub select_entry {
     # Execute the rofi command and capture the selected result
     my $selected_result = `echo "$results_text" | $rofi_command`;
     chomp($selected_result);
+    if ($selected_result eq '') {
+        print "No output from rofi, exiting...\n";
+        exit;
+    }
 
     print "Selected Result: $selected_result\n";
     my ($description, $task_name, $project_name) = $selected_result =~ /(.*) :: (.*)@(.*)/;
