@@ -288,7 +288,8 @@ sub select_entry {
     if (!defined $project_name) {
         my $project_task = select_project_task();
         ($task_name, $project_name) = $project_task =~ /(.*)@(.*)/;
-        print "TASK: $task_name, PROJECT: $project_name\n";
+        $description = $selected_result;
+        print "Description: $description, TASK: $task_name, PROJECT: $project_name\n";
     }
     print($project_name);
 
