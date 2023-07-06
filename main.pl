@@ -358,7 +358,7 @@ if ($command) {
         init_database();
         exit;
     }
-    elsif ($command eq 'start') {
+    elsif ($command eq 'start-dmenu') {
         select_entry();
     }
     else {
@@ -374,10 +374,10 @@ else {
 
 # Function to display usage information
 sub usage {
-    print "Usage: $0 [init|start]\n";
+    print "Usage: $0 [init|start-dmenu]\n";
     print "Commands:\n";
     print "  init\t\tPerform database initialization\n";
-    print "  start\t\tSelect and start clockify entry\n";
+    print "  start-dmenu\t\tSelect and start-dmenu clockify entry\n";
 }
 
 
