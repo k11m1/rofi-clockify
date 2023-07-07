@@ -334,6 +334,16 @@ SQL
 
 }
 
+sub clockify_stop {
+    my $result = `clockify-cli out --json`;
+    my $entry = decode_json($result)->[0];
+
+    my $description = $entry->{description};
+    my $task_name = $entry->{task}->{name} || '';
+    my $project_name = $entry->{project}->{name};
+    notify_desktop("out $description", "$task_name\@$project_name");
+}
+
 # init_database();
 # get_history();
 # select_entry();
@@ -365,8 +375,11 @@ if ($command) {
         init_database();
         exit;
     }
-    elsif ($command eq 'start-dmenu') {
+    elsif ($command eq 'start-dmenu' || $command eq 'start') {
         select_entry();
+    }
+    elsif ($command eq 'stop') {
+        clockify_stop();
     }
     else {
         print "Unknown command: $command\n";
@@ -381,10 +394,11 @@ else {
 
 # Function to display usage information
 sub usage {
-    print "Usage: $0 [init|start-dmenu]\n";
+    print "Usage: $0 [init|start|start-dmenu]\n";
     print "Commands:\n";
     print "  init\t\tPerform database initialization\n";
-    print "  start-dmenu\t\tSelect and start-dmenu clockify entry\n";
+    print "  start|start-dmenu\t\tSelect and start-dmenu clockify entry\n";
+    print "  stop\t\tStop current entry with clockify-cli out\n";
 }
 
 sub notify_desktop {
