@@ -304,6 +304,17 @@ sub select_entry {
     my $project_id = lookup_project_id($project_name);
     my $task_id = lookup_task_id($project_id, $task_name);
 
+    if (!defined $task_id) {
+        print "No task ID, probably doesn't exist\n";
+        $task_id = create_task($task_name, $project_name);
+        if(length $task_id == 0) {
+            print STDERR "Could not create task but no task selected\n";
+            # TODO: maybe task less project?
+            exit 1;
+
+        }
+
+    }
     print "Project ID: $project_id\n";
     print "Task ID: $task_id\n";
 
@@ -331,6 +342,46 @@ SQL
 
 
 
+
+}
+
+sub ask_create_task {
+    my $task_name = shift @_;
+    my $project_name = shift @_;
+
+    my $rofi_command = 'rofi -dmenu';
+
+    my $selected_result = `echo "YES\nNO\n" | $rofi_command -p "Create new task \"$task_name\"\\@$project_name? "`;
+    chomp($selected_result);
+    if ($selected_result eq '') {
+        print "No output from rofi, exiting...\n";
+        exit;
+    }
+    if ($selected_result eq 'YES') {
+        return 1;
+    }
+    return 0;
+}
+
+sub create_task {
+    my $task_name = shift @_;
+    my $project_name = shift @_;
+    my $project_id = shift @_;
+
+    if (ask_create_task($task_name, $project_name)) {
+        my $result = `clockify-cli task add -p "$project_name" --name "$task_name" --json`;
+        print "Created new task $task_name\n";
+        # TODO: validation
+        my $task = decode_json($result)->[0];
+        my $insert_task_query = <<SQL;
+INSERT INTO tasks (id, name, project_id, status) VALUES (?, ?, ?, ?);
+SQL
+
+        my $insert_task = $dbh->prepare($insert_task_query);
+        $insert_task->execute($task->{id}, $task->{name}, $task->{projectId}, $task->{status}) or die "Error inserting project data: $DBI::errstr";
+        return $task->{id};
+    }
+    return "";
 
 }
 
