@@ -6,6 +6,8 @@ use DBI;
 use JSON;
 use Getopt::Long;
 use Desktop::Notify;
+use File::Copy;
+
 
 my $cache_dir = $ENV{XDG_CACHE_HOME} || "/home/$ENV{USER}/.cache";
 my $database = "$cache_dir/klimify.db";
@@ -176,6 +178,7 @@ SQL
     $sth_check_entry->finish;
     $insert_entry->finish;
 
+    1;
 }
 
 
@@ -255,15 +258,71 @@ SQL
 
 }
 
+sub get_projects {
+    my $get_project_query = <<'SQL';
+SELECT p.name as project  FROM projects as p
+WHERE p.archived = 0;
+SQL
+
+    my $sth_join = $dbh->prepare($get_project_query);
+
+
+    $sth_join->execute() or die "Error executing join query: $DBI::errstr";
+
+    my @results = map {
+    my $name = $_->{project} // '';
+    "$name";
+} @{$sth_join->fetchall_arrayref({})};
+
+    my $results_text = join("\n", @results);
+    return $results_text;
+
+}
+
+
 sub select_project_task {
     my $results_text = get_projects_tasks();
+    my $project_text = get_projects();
     my $rofi_command = 'rofi -dmenu';
 
-    my $selected_result = `echo "$results_text" | $rofi_command`;
+    my $selected_result = `echo "$project_text\n$results_text" | $rofi_command`;
     chomp($selected_result);
 
     print "Selected Result: $selected_result\n";
     return $selected_result
+
+}
+
+sub function_menu() {
+    my $rofi_command = 'rofi -dmenu';
+    my $result = `echo "Init database\nDANGEROUS: Purge and init\nexit" | $rofi_command`;
+    chomp($result);
+    print("Selected $result\n");
+    if ($result eq 'Init database') {
+        notify_desktop("INIT DATABASE START", "");
+        print("Initializing database...\n");
+        my $output = init_database();
+        notify_desktop("INIT DATABASE FINISH", "$output");
+        print("Database initialization finished...\n");
+    } elsif ($result eq 'DANGEROUS: Purge and init') {
+        # TODO maybe only database purge?
+        print("Database purge preparation...\n");
+        notify_desktop("Preparing reinit", "database close and MV database");
+        print("Database disconnect...\n");
+        $dbh->disconnect();
+        print("Database move...\n");
+        move($database, "$database.old");
+        notify_desktop("Reconnecting database", "");
+        print("Database reconnect...\n");
+        $dbh = DBI->connect("dbi:SQLite:dbname=$database")
+            or die "Couldn't connect to database: $DBI::errstr";
+        notify_desktop("INIT DATABASE START", "");
+        print("Initializing database...\n");
+        my $output = init_database();
+        notify_desktop("INIT DATABASE FINISH", "$output");
+        print("Database initialization finished...\n");
+
+    }
 
 }
 
@@ -276,7 +335,16 @@ sub select_entry {
 
     # Execute the rofi command and capture the selected result
     my $selected_result = `echo "$results_text" | $rofi_command`;
+    my $exit_code = $? >> 8;
     chomp($selected_result);
+
+
+    print("EXIT CODE IS $exit_code\n");
+    if ($exit_code == 10) {
+        print "Entering function menu 1\n";
+        function_menu();
+        exit;
+    }
     if ($selected_result eq '') {
         print "No output from rofi, exiting...\n";
         exit;
