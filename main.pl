@@ -329,7 +329,7 @@ sub function_menu() {
 sub select_entry {
 
     my $results_text = get_history();
-    my $rofi_command = 'rofi -dmenu';
+    my $rofi_command = 'rofi -dmenu -i ';
 
     # Join the results with newline separator
 
