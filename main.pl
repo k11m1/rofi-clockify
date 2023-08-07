@@ -187,6 +187,8 @@ SQL
 sub lookup_project_id {
     my ($project_name) = @_;
 
+    return undef unless defined $project_name;
+
     my $query = "SELECT id FROM projects WHERE name = ?";
     my $sth = $dbh->prepare($query);
     $sth->execute($project_name);
@@ -198,6 +200,8 @@ sub lookup_project_id {
 
 sub lookup_task_id {
     my ($project_id, $task_name) = @_;
+
+    return undef unless defined $project_id && defined $task_name;
 
     my $query = "SELECT id FROM tasks WHERE project_id = ? AND name = ?";
     my $sth = $dbh->prepare($query);
