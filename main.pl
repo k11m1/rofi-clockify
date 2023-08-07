@@ -230,9 +230,9 @@ SQL
     $sth_join->execute() or die "Error executing join query: $DBI::errstr";
 
     my @results = map {
-    my $description = $_->{name} // '[TODO DESCRIPTION]';
-    my $name = $_->{project} // '[TODO PROJECT]';
-    my $task_name = $_->{task} // '[TODO TASK]';
+    my $description = $_->{name} // '';
+    my $name = $_->{project} // '';
+    my $task_name = $_->{task} // '';
     "$description :: $task_name\@$name";
 } @{$sth_join->fetchall_arrayref({})};
 
