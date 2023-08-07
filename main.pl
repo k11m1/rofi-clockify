@@ -294,12 +294,12 @@ sub select_project_task {
 }
 
 sub function_menu() {
-    my $rofi_command = 'rofi -dmenu';
+    my $rofi_command = 'rofi -dmenu -i';
     my $result = `echo "Init database\nDANGEROUS: Purge and init\nexit" | $rofi_command`;
     chomp($result);
     print("Selected $result\n");
     if ($result eq 'Init database') {
-        notify_desktop("INIT DATABASE START", "");
+        notify_desktop("INIT DATABASE START (doesn't destroy entries)", "");
         print("Initializing database...\n");
         my $output = init_database();
         notify_desktop("INIT DATABASE FINISH", "$output");
