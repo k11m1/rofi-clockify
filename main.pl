@@ -1,5 +1,7 @@
 #!/usr/bin/env perl
 
+use v5.35;
+
 use strict;
 use warnings;
 use DBI;
@@ -7,6 +9,9 @@ use JSON;
 use Getopt::Long;
 use Desktop::Notify;
 use File::Copy;
+
+
+use feature qw(signatures);
 
 my $DMENU_COMMAND = 'rofi -i -dmenu ';
 
@@ -330,17 +335,12 @@ sub function_menu() {
 
 }
 
-sub select_entry {
+sub execute_command ($command){
+    print "Executing a COMMAND\n";
+    # print "$command"; # TODO: debug only
+    my $result = `$command`;
 
-    my $results_text = get_history();
-
-    # Join the results with newline separator
-
-    # Execute the rofi command and capture the selected result
-    my $selected_result = `echo "$results_text" | $DMENU_COMMAND`;
     my $exit_code = $? >> 8;
-    chomp($selected_result);
-
 
     print("EXIT CODE IS $exit_code\n");
     if ($exit_code == 10) {
@@ -348,10 +348,30 @@ sub select_entry {
         function_menu();
         exit;
     }
+    return $result;
+    # return ($result, $exit_code);
+}
+
+sub select_entry {
+
+    ## Plan:
+    # Ask for entries, if full match, get desc, project and task (determined by regex with @)
+    # if matched then start and notify
+    # else new rofi with ' ' + projects + task@projects
+    #
+    # If project name or task name was given but it doesn't match internal DB, ask for creation and restore execution
+    #
+    # If exited with admin menu, call admin menu -> handle execution function?
+
+    my $results_text = get_history();
+    my $selected_result = execute_command (qq;echo "$results_text" | $DMENU_COMMAND;);
     if ($selected_result eq '') {
         print "No output from rofi, exiting...\n";
         exit;
     }
+    chomp($selected_result);
+
+
 
     print "Selected Result: $selected_result\n";
     my ($description, $task_name, $project_name) = $selected_result =~ /(.*) :: (.*)@(.*)/;
@@ -359,10 +379,26 @@ sub select_entry {
     if (!defined $project_name) {
         my $project_task = select_project_task();
         ($task_name, $project_name) = $project_task =~ /(.*)@(.*)/;
+        if (!defined $project_name) {
+            print "Proceeding with only description: $description\n";
+
+            # if we get blank, then no project or task, but otherwise it is a project name
+
+            if ($project_task ne '') {
+                $project_name = $project_task;
+            }
+
+
+        } 
+
+        # first input was the description
         $description = $selected_result;
+
+        
         print "Description: $description, TASK: $task_name, PROJECT: $project_name\n";
     }
     print($project_name);
+
 
 
     $project_name =~ s/^\s+|\s+$//g;  # Trim leading and trailing spaces
@@ -375,21 +411,22 @@ sub select_entry {
     my $project_id = lookup_project_id($project_name);
     my $task_id = lookup_task_id($project_id, $task_name);
 
-    if (!defined $task_id) {
-        print "No task ID, probably doesn't exist\n";
-        $task_id = create_task($task_name, $project_name);
-        if(length $task_id == 0) {
-            print STDERR "Could not create task but no task selected\n";
-            # TODO: maybe task less project?
-            exit 1;
-
-        }
-
-    }
+    ## FIXME: handle creating of the task
+    #if (!defined $task_id) {
+    #    print "No task ID, probably doesn't exist\n";
+    #    $task_id = create_task($task_name, $project_name);
+    #    if(length $task_id == 0) {
+    #        print STDERR "Could not create task but no task selected\n";
+    #        # TODO: maybe task less project?
+    #        exit 1;
+    #    }
+    #}
     print "Project ID: $project_id\n";
     print "Task ID: $task_id\n";
 
-    my $result = `clockify-cli start $project_id "$description" --task $task_id --json`;
+    # my $result = `clockify-cli start $project_id "$description" --task $task_id --json`;
+
+    my $result = add_desc_project_task($description, $project_id, $task_id);
 
 
     my $entry = decode_json($result)->[0];
@@ -412,6 +449,31 @@ SQL
     notify_desktop("start $description", "$task_name\@$project_name");
 
 
+
+
+}
+
+
+sub add_desc_project_task {
+    my $description = shift @_ // '""'; # if we don't get description, empty description is possible
+    my $project_id = shift @_;
+    my $task_id = shift @_;
+
+    my $clockify_query = "clockify-cli start ";
+    if (defined $project_id) {
+        $clockify_query .= " $project_id ";
+    }
+
+    $clockify_query .= qq/-d "$description" --json/;
+    my $result = execute_command(qq;$clockify_query;);
+    print $result;
+
+    # TODO: parse result into DB and for notification
+
+    # TODO: notify user IN Main thread
+    # notify_desktop("start $description", "$task_name\@$project_name");
+
+    return $result
 
 
 }
