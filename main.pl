@@ -8,6 +8,8 @@ use Getopt::Long;
 use Desktop::Notify;
 use File::Copy;
 
+my $DMENU_COMMAND = 'rofi -i -dmenu ';
+
 
 my $cache_dir = $ENV{XDG_CACHE_HOME} || "/home/$ENV{USER}/.cache";
 my $database = "$cache_dir/klimify.db";
@@ -283,19 +285,17 @@ SQL
 sub select_project_task {
     my $results_text = get_projects_tasks();
     my $project_text = get_projects();
-    my $rofi_command = 'rofi -dmenu';
 
-    my $selected_result = `echo "$project_text\n$results_text" | $rofi_command`;
+    my $selected_result = `echo -e "\n$project_text\n$results_text" | $DMENU_COMMAND`;
     chomp($selected_result);
 
-    print "Selected Result: $selected_result\n";
+    print "Selected Project/task: $selected_result\n";
     return $selected_result
 
 }
 
 sub function_menu() {
-    my $rofi_command = 'rofi -dmenu -i';
-    my $result = `echo "Init database\nDANGEROUS: Purge and init\nexit" | $rofi_command`;
+    my $result = `echo "Init database\nDANGEROUS: Purge and init\nexit" | $DMENU_COMMAND`;
     chomp($result);
     print("Selected $result\n");
     if ($result eq 'Init database') {
@@ -329,12 +329,11 @@ sub function_menu() {
 sub select_entry {
 
     my $results_text = get_history();
-    my $rofi_command = 'rofi -dmenu -i ';
 
     # Join the results with newline separator
 
     # Execute the rofi command and capture the selected result
-    my $selected_result = `echo "$results_text" | $rofi_command`;
+    my $selected_result = `echo "$results_text" | $DMENU_COMMAND`;
     my $exit_code = $? >> 8;
     chomp($selected_result);
 
@@ -417,9 +416,8 @@ sub ask_create_task {
     my $task_name = shift @_;
     my $project_name = shift @_;
 
-    my $rofi_command = 'rofi -dmenu';
 
-    my $selected_result = `echo "YES\nNO\n" | $rofi_command -p "Create new task \"$task_name\"\\@$project_name? "`;
+    my $selected_result = `echo "YES\nNO\n" | $DMENU_COMMAND -p "Create new task \"$task_name\"\\@$project_name? "`;
     chomp($selected_result);
     if ($selected_result eq '') {
         print "No output from rofi, exiting...\n";
