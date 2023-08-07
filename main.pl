@@ -214,7 +214,7 @@ sub get_history {
     my $get_history_query = <<'SQL';
 SELECT h.description as name, t.name as task, p.name as project, p.id as pid, t.id as tid
 FROM history as h
-JOIN projects p ON h.project_id = p.id
+LEFT JOIN projects p ON h.project_id = p.id
 LEFT JOIN tasks t ON h.task_id = t.id
 GROUP BY h.description, t.name, p.name
 ORDER BY max(start) DESC;
