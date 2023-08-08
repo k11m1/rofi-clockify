@@ -464,7 +464,11 @@ sub add_desc_project_task {
         $clockify_query .= " $project_id ";
     }
 
-    $clockify_query .= qq/-d "$description" --json/;
+    $clockify_query .= qq/-d "$description"/;
+    if (defined $task_id) {
+        $clockify_query .= " --task $task_id ";
+    }
+    $clockify_query .= " --json";
     my $result = execute_command(qq;$clockify_query;);
     print $result;
 
