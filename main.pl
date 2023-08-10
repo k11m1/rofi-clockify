@@ -139,7 +139,22 @@ SQL
 
 
 ## History
+    init_history();
 
+
+
+
+
+    # Finish the statement handles
+    $sth_check->finish;
+    $insert_project->finish;
+    $sth_check_task->finish;
+    $insert_task->finish;
+
+    1;
+}
+
+sub init_history {
 
     my $out_history = `clockify-cli report 2023-06-01 today --json`;
     # Decode the JSON output
@@ -158,34 +173,30 @@ SQL
     my $sth_check_entry = $dbh->prepare($check_entry_query);
 
 
+    my $added_counter = 0;
+
     foreach my $entry (@$history) {
         $sth_check_entry->execute($entry->{id}) or die "Error checking task existence: $DBI::errstr";
         my ($entry_count) = $sth_check_entry->fetchrow_array();
         print "Entry count = $entry_count\n";
 
+        # TODO: check if the project and task already exists?
+
         if ($entry_count == 0) {
             # Execute the SQL statement to insert project data
             $insert_entry->execute($entry->{id}, $entry->{description}, $entry->{project}->{id}, $entry->{task}->{id}, $entry->{timeInterval}->{start}) or die "Error inserting project data: $DBI::errstr";
             print "Entry inserted.\n";
+            $added_counter += 1;
         } else {
             print "Entry already exists. Skipping insertion.\n";
         }
     }
 
-
-
-
-
-
-    # Finish the statement handles
-    $sth_check->finish;
-    $insert_project->finish;
-    $sth_check_task->finish;
-    $insert_task->finish;
+    # cleanup
     $sth_check_entry->finish;
     $insert_entry->finish;
 
-    1;
+    return $added_counter;
 }
 
 
@@ -304,7 +315,7 @@ sub select_project_task {
 }
 
 sub function_menu() {
-    my $result = `echo "Init database\nDANGEROUS: Purge and init\nexit" | $DMENU_COMMAND`;
+    my $result = `echo "Update new history entries\nInit database\nDANGEROUS: Purge and init\nexit" | $DMENU_COMMAND`;
     chomp($result);
     print("Selected $result\n");
     if ($result eq 'Init database') {
@@ -330,6 +341,10 @@ sub function_menu() {
         my $output = init_database();
         notify_desktop("INIT DATABASE FINISH", "$output");
         print("Database initialization finished...\n");
+    } elsif ($result eq 'Update new history entries') {
+        notify_desktop("Updating new history entries", "");
+        my $added = init_history();
+        notify_desktop("Finished updating new entries", "Added new $added entries.");
 
     }
 
@@ -345,7 +360,7 @@ sub execute_command ($command){
     print("EXIT CODE IS $exit_code\n");
     if ($exit_code == 10) {
         print "Entering function menu 1\n";
-        function_menu();
+        function_menu(); # admin menu
         exit;
     }
     return $result;
