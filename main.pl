@@ -7,7 +7,6 @@ use warnings;
 use DBI;
 use JSON;
 use Getopt::Long;
-use Desktop::Notify;
 use File::Copy;
 
 
@@ -607,13 +606,7 @@ sub notify_desktop {
     my $summary = shift @_;
     my $text = shift @_;
     
-    my $notify = Desktop::Notify->new();
-    my $notification = $notify->create(summary => "Klimify: $summary",
-                            body => "$text",
-                            timeout => 2000
-        );
-
-    $notification->show();
+    system('notify-send', "Klimify: $summary", "$text", '-t', '2000');
 }
 
 

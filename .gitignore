@@ -3,3 +3,12 @@
 *.log
 tmp/
 database.db
+
+# Nix result symlink
+result
+result-*
+
+# Nix build artifacts
+*.swp
+*.swo
+*~

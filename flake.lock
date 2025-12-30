@@ -1,0 +1,48 @@
+{
+  "nodes": {
+    "clockify-cli-flake": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1757667765,
+        "narHash": "sha256-FD74SLhKihy514YVvV8dIXjqbbEuKLBs4dOT9uQLK4A=",
+        "owner": "k11m1",
+        "repo": "clockify-cli-flake",
+        "rev": "6df20555a556d3144304f8644aa518e5d1f7db15",
+        "type": "github"
+      },
+      "original": {
+        "owner": "k11m1",
+        "repo": "clockify-cli-flake",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1766902085,
+        "narHash": "sha256-coBu0ONtFzlwwVBzmjacUQwj3G+lybcZ1oeNSQkgC0M=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "c0b0e0fddf73fd517c3471e546c0df87a42d53f4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "clockify-cli-flake": "clockify-cli-flake",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
