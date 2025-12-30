@@ -39,6 +39,8 @@ For better use consider having `start` and `stop` mapped to some shortcut.
 You need to first initialize the database to properly use it.
 For initialization of the internal database run `init` or `start` and press `ALT+1` to get into admin menu and choose init.
 
+The database file is stored at `~/.cache/rofi-clockify.db` (or `$XDG_CACHE_HOME/rofi-clockify.db` if set).
+
 ## Dependencies
 
 - [clockify-cli](https://github.com/lucassabreu/clockify-cli) - Provided via [clockify-cli-flake](https://github.com/k11m1/clockify-cli-flake)
@@ -48,3 +50,13 @@ For initialization of the internal database run `init` or `start` and press `ALT
 
 All dependencies are automatically managed by the Nix flake.
 
+## Changes Made with AI
+
+This project was edited with AI to include a Nix flake for easier installation on NixOS.
+
+### Perl Dependency Updates
+
+- `notify-send` replaces `Desktop::Notify`.
+- Compatible with `DBI`, `JSON`, and `SQLite` modules.
+
+(Note: Not all dependency changes were tested.)

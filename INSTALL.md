@@ -111,13 +111,3 @@ Remove the package from your NixOS configuration and rebuild:
 sudo nixos-rebuild switch --flake .
 ```
 
-## Changes Made with AI
-
-This project was edited with AI to include a Nix flake for easier installation on NixOS.
-
-### Perl Dependency Updates
-
-- `notify-send` replaces `Desktop::Notify`.
-- Compatible with `DBI`, `JSON`, and `SQLite` modules.
-
-(Note: Not all dependency changes were tested.)

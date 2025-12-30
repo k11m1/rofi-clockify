@@ -8,17 +8,33 @@ use DBI;
 use JSON;
 use Getopt::Long;
 use File::Copy;
-
+use File::Path qw(make_path);
 
 use feature qw(signatures);
 
 my $DMENU_COMMAND = 'rofi -i -dmenu ';
 
-
+# Determine cache directory and database path
 my $cache_dir = $ENV{XDG_CACHE_HOME} || "/home/$ENV{USER}/.cache";
-my $database = "$cache_dir/klimify.db";
-my $dbh = DBI->connect("dbi:SQLite:dbname=$database")
-    or die "Couldn't connect to database: $DBI::errstr";
+my $database = "$cache_dir/rofi-clockify.db";
+
+# Ensure cache directory exists
+unless (-d $cache_dir) {
+    make_path($cache_dir) or die "Failed to create cache directory $cache_dir: $!";
+}
+
+# Connect to database with error handling
+my $dbh = DBI->connect("dbi:SQLite:dbname=$database", "", "", {
+    RaiseError => 1,
+    PrintError => 0,
+}) or die "Couldn't connect to database: $DBI::errstr";
+
+sub check_database_initialized {
+    my $sth = $dbh->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='history'");
+    $sth->execute();
+    my $result = $sth->fetchrow_arrayref();
+    return defined $result;
+}
 
 sub init_database {
     # Create "projects" table
@@ -577,6 +593,9 @@ if ($command) {
         exit;
     }
     elsif ($command eq 'start-dmenu' || $command eq 'start') {
+        unless (check_database_initialized()) {
+            die "Database not initialized. Please run '$0 init' first.\n";
+        }
         select_entry();
     }
     elsif ($command eq 'stop') {
@@ -606,7 +625,7 @@ sub notify_desktop {
     my $summary = shift @_;
     my $text = shift @_;
     
-    system('notify-send', "Klimify: $summary", "$text", '-t', '2000');
+    system('notify-send', "Rofi-Clockify: $summary", "$text", '-t', '2000');
 }
 
 
