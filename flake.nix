@@ -3,16 +3,19 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    clockify-cli-flake = {
-      url = "github:k11m1/clockify-cli-flake";
+    nur = {
+      url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, clockify-cli-flake }:
+  outputs = { self, nixpkgs, nur }:
     let
       system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ nur.overlays.default ];
+      };
       
       # Perl dependencies
       perlPackages = with pkgs.perlPackages; [
@@ -66,7 +69,7 @@ EOF
 
           wrapProgram $out/bin/rofi-clockify \
             --prefix PATH : ${pkgs.lib.makeBinPath [ 
-              clockify-cli-flake.packages.${system}.default
+              pkgs.nur.repos.lucassabreu.clockify-cli
               pkgs.rofi
               pkgs.libnotify
             ]} \
@@ -94,7 +97,7 @@ EOF
         buildInputs = [
           pkgs.perl
           pkgs.rofi
-          clockify-cli-flake.packages.${system}.default
+          pkgs.nur.repos.lucassabreu.clockify-cli
         ] ++ perlPackages;
 
         shellHook = ''

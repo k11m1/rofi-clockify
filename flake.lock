@@ -1,22 +1,23 @@
 {
   "nodes": {
-    "clockify-cli-flake": {
+    "flake-parts": {
       "inputs": {
-        "nixpkgs": [
+        "nixpkgs-lib": [
+          "nur",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1757667765,
-        "narHash": "sha256-FD74SLhKihy514YVvV8dIXjqbbEuKLBs4dOT9uQLK4A=",
-        "owner": "k11m1",
-        "repo": "clockify-cli-flake",
-        "rev": "6df20555a556d3144304f8644aa518e5d1f7db15",
+        "lastModified": 1733312601,
+        "narHash": "sha256-4pDvzqnegAfRkPwO3wmwBhVi/Sye1mzps0zHWYnP88c=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9",
         "type": "github"
       },
       "original": {
-        "owner": "k11m1",
-        "repo": "clockify-cli-flake",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
         "type": "github"
       }
     },
@@ -36,10 +37,31 @@
         "type": "github"
       }
     },
+    "nur": {
+      "inputs": {
+        "flake-parts": "flake-parts",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1767120532,
+        "narHash": "sha256-ACCtBdaU86grwsnx9+RIcgJBsaaVUGC7+WHjs97+j8I=",
+        "owner": "nix-community",
+        "repo": "NUR",
+        "rev": "51da3b65b29363b3795705e7a15a748141b4bf14",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "NUR",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
-        "clockify-cli-flake": "clockify-cli-flake",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "nur": "nur"
       }
     }
   },
