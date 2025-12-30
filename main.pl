@@ -624,8 +624,8 @@ sub usage {
 sub notify_desktop {
     my $summary = shift @_;
     my $text = shift @_;
-    
-    system('notify-send', "Rofi-Clockify: $summary", "$text", '-t', '2000');
+    my $icon = 'clock'; # Use a standard icon name, or provide a path to a custom icon
+    system('notify-send', '-i', $icon, "Rofi-Clockify: $summary", "$text", '-t', '2000');
 }
 
 
