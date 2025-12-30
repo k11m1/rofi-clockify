@@ -37,6 +37,33 @@
           cp main.pl $out/bin/rofi-clockify
           chmod +x $out/bin/rofi-clockify
 
+          # Desktop entry for application with actions (Start, Stop)
+          mkdir -p $out/share/applications
+          cat > $out/share/applications/rofi-clockify.desktop <<EOF
+[Desktop Entry]
+Name=Rofi Clockify
+GenericName=Time Tracker
+Comment=Track Clockify entries via Rofi
+Exec=$out/bin/rofi-clockify start-dmenu
+TryExec=$out/bin/rofi-clockify
+Icon=clock
+Terminal=false
+Type=Application
+Categories=Office;Utility;
+Actions=Start;Stop;
+
+[Desktop Action Start]
+Name=Start via dmenu
+Exec=$out/bin/rofi-clockify start-dmenu
+
+[Desktop Action Stop]
+Name=Stop current entry
+Exec=$out/bin/rofi-clockify stop
+EOF
+
+	chmod +x $out/share/applications/rofi-clockify.desktop
+
+
           wrapProgram $out/bin/rofi-clockify \
             --prefix PATH : ${pkgs.lib.makeBinPath [ 
               clockify-cli-flake.packages.${system}.default

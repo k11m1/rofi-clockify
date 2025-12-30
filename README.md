@@ -34,6 +34,8 @@ Commands:
 
 For better use consider having `start` and `stop` mapped to some shortcut.
 
+**Tip:** After installation, `rofi-clockify` appears as a system application. You can bind its `start-dmenu` and `stop` actions to custom keyboard shortcuts for fast time tracking control. See [INSTALL.md - Application Integration](INSTALL.md#application-integration) for more details.
+
 ### initialization
 
 You need to first initialize the database to properly use it.

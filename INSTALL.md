@@ -27,7 +27,7 @@ nix build
 ./result/bin/rofi-clockify start
 ```
 
-## NixOS Integration
+## NixOS Integration (**TESTED**)
 
 To integrate `rofi-clockify` into NixOS:
 
@@ -45,7 +45,6 @@ To integrate `rofi-clockify` into NixOS:
    };
    ```
 
-**Tested on NixOS using the steps above.**
 
 ## Keyboard Shortcuts Setup
 
@@ -76,15 +75,17 @@ super + shift + x
     rofi-clockify stop
 ```
 
-### For KDE Plasma
+### For KDE Plasma (**TESTED**)
 
 1. Open **System Settings**
-2. Navigate to **Shortcuts** → **Add New** → **Command or Script**
-3. Enter the command: `/run/current-system/sw/bin/rofi-clockify start-dmenu`
-4. Enter a name for the shortcut
-5. Click the **Add** button to confirm
-6. Set custom shortcut: `Meta+C`
+2. Go to **Shortcuts** → **Add New** → **Application...**
+3. Select **Rofi Clockify** from the list
+4. Bind shortcuts to the available actions: **Start via dmenu** and **Stop current entry**
+5. Apply your changes
 
+## Application Integration
+
+After installation, `rofi-clockify` is available as a system application with two action targets: **Start via dmenu** and **Stop current entry**. You can bind these actions directly in KDE Plasma's shortcut settings by adding a new Application shortcut and selecting Rofi Clockify, then assigning your preferred key combinations to each action.
 
 ## First Time Setup
 
@@ -92,22 +93,3 @@ After installation, initialize the database:
 ```bash
 rofi-clockify init
 ```
-
-Or use the admin menu (press `ALT+1` during start) and choose "Init database".
-
-## Updating
-
-Update your flake inputs:
-```bash
-nix flake update
-# Then rebuild your system
-sudo nixos-rebuild switch --flake .
-```
-
-## Uninstallation
-
-Remove the package from your NixOS configuration and rebuild:
-```bash
-sudo nixos-rebuild switch --flake .
-```
-
